@@ -1,69 +1,97 @@
 # Employee Salary Management System
 
-Rails 7 HR dashboard for employees and salary insights: server-rendered UI (Hotwire), SQLite, Tailwind CSS, Pagy pagination, and Chartkick visualizations backed by aggregate SQL via a query object.
+Rails 7 app for employee records and salary analytics: **Hotwire** (Turbo) server-rendered UI, SQLite, Tailwind, **Pagy**, **Chartkick**, and SQL aggregates via `SalaryStatsQuery`.
+
+It also ships a **`/api/v1/*` JSON API** and a **Vite + React** SPA in `frontend/` for the same domain over HTTP JSON.
+
+## Quick start
+
+**Prerequisites:** Ruby (see `.ruby-version`), Bundler, SQLite, **Node.js** (for the React app).
+
+```bash
+bundle install
+npm install --prefix frontend
+bin/rails db:prepare
+```
+
+Optional demo data (~10k rows):
+
+```bash
+bin/rails db:seed
+```
+
+Start everything (Rails, Tailwind watcher, Vite):
+
+```bash
+bin/dev
+```
+
+| What | URL |
+|------|-----|
+| **React SPA** (use this for the API-driven UI) | http://localhost:5173 |
+| **Rails** (HTML UI + JSON API) | http://localhost:3000 |
+
+The Vite dev server **proxies** `/api` to Rails on port 3000, so the SPA calls `/api/v1/...` without CORS issues in local development.
+
+## Development without `bin/dev`
+
+Run in **two terminals** from the project root:
+
+```bash
+# Terminal 1 — API + Hotwire UI
+bin/rails server -p 3000
+```
+
+```bash
+# Terminal 2 — React
+npm run dev --prefix frontend
+```
+
+Still open **http://localhost:5173** for the React client. If you only need the Rails HTML app, use **http://localhost:3000** (e.g. employees and insights as server-rendered pages).
+
+`bin/dev` is defined in **`Procfile.dev`**: Rails on 3000, Tailwind watch, and `npm run dev` in `frontend/`.
+
+## JSON API and React SPA
+
+- **Employees:** `GET/POST /api/v1/employees`, `GET/PATCH/DELETE /api/v1/employees/:id` (JSON). Query params include `q`, `page`, `limit`.
+- **Insights:** `GET /api/v1/salary_insights` — aggregates for charts/tables.
+
+**Production-style split:** build the SPA with `npm run build --prefix frontend` (output in `frontend/dist`). Set **`VITE_API_BASE_URL`** to your Rails base URL when the static files are served separately. Configure Rails **`FRONTEND_ORIGIN`** (and CORS) so the browser may call the API from that origin.
 
 ## Handling the ~10,000 record constraint
 
-This app is designed so “full table” operations stay fast and predictable as data grows into the thousands of rows:
+This app is designed so full-table work stays fast as data grows:
 
-1. **Database indexing** — The `employees` table has a composite index on `[country, job_title]` for grouped reporting and filtering, and an index on `salary` for range/sort queries used in insights. See `db/schema.rb` and the original migration.
+1. **Indexing** — Composite index on `[country, job_title]` and an index on `salary` for reporting. See `db/schema.rb`.
+2. **Pagy** — List endpoints paginate (e.g. 25 rows per page); the browser never loads all employees at once.
+3. **Bulk seeds** — `db/seeds.rb` uses **`activerecord-import`** in batches inside a transaction instead of thousands of individual inserts.
 
-2. **Pagy (server-side pagination)** — The employee list never loads all rows at once. The index action uses **Pagy** with a fixed page size (25 rows), so the browser and Rails only materialize one page per request.
+## Why Hotwire for the main UI?
 
-3. **Bulk imports for seeds** — `db/seeds.rb` inserts **10,000** demo rows using **`activerecord-import`** in batched inserts inside a single transaction, instead of thousands of `Employee.create!` calls. That keeps seed time low and reflects how you would backfill large datasets in production.
-
-Together: indexes keep analytics queries selective, Pagy keeps list endpoints bounded, and bulk import keeps one-off large loads efficient.
-
-## Why Hotwire instead of React?
-
-We use **Hotwire** (Turbo + Stimulus) rather than a separate React (or similar) SPA because:
-
-- **Speed of development** — Forms, tables, and insights stay as Rails views and controllers. There is no second build pipeline, duplicate validation logic, or API contract to maintain for every screen change.
-- **Lower total cost of ownership (TCO)** — Fewer moving parts (no Node/React version matrix for the main UI), smaller operational surface, and onboarding stays “one Rails app” for most features.
-- **Fit for this product** — HR lists and charts are document-style workflows with server-driven HTML; Turbo Frames/Streams give partial updates without shipping a large client bundle.
-
-React remains a strong choice when you need a highly interactive client-only experience or a shared API across many non-Rails clients; for this app, Hotwire matches the product and team efficiency goals.
+We use **Hotwire** (Turbo + Stimulus) for the default Rails UI because forms, tables, and insights stay in views and controllers without maintaining a parallel API contract for every change. The **React SPA** in `frontend/` reuses the same behavior through the JSON API when you want a client-heavy or API-first workflow.
 
 ## Code style (RuboCop)
 
-Linting uses **`rubocop-rails-omakase`**, which builds on RuboCop’s defaults and Rails conventions and aligns with the wider **[Ruby Style Guide](https://rubystyle.guide/)** community practice.
+Linting uses **`rubocop-rails-omakase`**. See the **[Ruby Style Guide](https://rubystyle.guide/)**.
 
 ```bash
 bin/rubocop
-# or
-bundle exec rubocop
+bundle exec rubocop -A   # auto-correct safe cops
 ```
 
-Auto-correct safe cops:
-
-```bash
-bundle exec rubocop -A
-```
-
-Configuration lives in **`.rubocop.yml`**.
+Configuration: **`.rubocop.yml`**.
 
 ## Schema annotations (Annotate)
 
-Model files can include a **schema comment block** at the top (table name, columns, indexes) maintained by the **annotate** gem.
-
-After changing the schema (e.g. new migrations), refresh annotations:
+After migrations, refresh model schema comments:
 
 ```bash
 bundle exec annotate
 ```
 
-## Setup
-
-Prerequisites: **Ruby** (see `.ruby-version`), **Bundler**, **SQLite** (no separate server required for development).
-
-```bash
-bundle install
-bin/rails db:prepare
-```
-
 ## Seed data (10k employees)
 
-Loads name lists from `lib/data/*.txt` and bulk-inserts 10,000 employees. Skip with `SKIP_EMPLOYEE_SEED=1` if you only want an empty database.
+Loads name lists from `lib/data/*.txt` and bulk-inserts 10,000 employees. Skip with `SKIP_EMPLOYEE_SEED=1` for an empty database.
 
 ```bash
 bin/rails db:seed
@@ -75,14 +103,6 @@ bin/rails db:seed
 bundle exec rspec
 ```
 
-## Development server
+## Insights (Hotwire UI)
 
-```bash
-bin/dev
-```
-
-This runs the Rails server and Tailwind watcher (see `Procfile.dev`). Alternatively: `bin/rails server` and run Tailwind separately if needed.
-
-## Insights
-
-Open **Salary insights** from the UI or visit `/insights`. Charts use **Chartkick** with data from `SalaryStatsQuery` (aggregations run in SQL).
+From the Rails UI, open **Salary insights**, or visit **`/insights`**. Charts use **Chartkick** with data from `SalaryStatsQuery` (SQL aggregations).

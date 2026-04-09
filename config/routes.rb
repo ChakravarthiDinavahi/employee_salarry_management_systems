@@ -1,4 +1,11 @@
 Rails.application.routes.draw do
+  namespace :api do
+    namespace :v1, defaults: { format: :json } do
+      resources :employees, only: %i[index show create update destroy]
+      get "salary_insights", to: "salary_insights#index"
+    end
+  end
+
   get "insights", to: "salary_insights#index", as: :salary_insights
 
   resources :employees
