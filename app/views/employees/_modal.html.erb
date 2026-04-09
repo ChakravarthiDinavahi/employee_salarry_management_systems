@@ -1,0 +1,17 @@
+<%= turbo_frame_tag "employee_modal" do %>
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4" data-controller="modal">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" data-action="click->modal#close"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 border border-slate-200">
+      <button
+        type="button"
+        class="absolute top-3 right-3 rounded-full p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+        data-action="modal#close"
+        aria-label="Close"
+      >
+        <span class="text-xl leading-none">&times;</span>
+      </button>
+      <h2 class="text-xl font-semibold text-slate-900 mb-4 pr-8"><%= title %></h2>
+      <%= render "form", employee: employee, q: q %>
+    </div>
+  </div>
+<% end %>

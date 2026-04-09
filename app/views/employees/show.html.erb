@@ -1,0 +1,19 @@
+<% content_for :title, "#{@employee.first_name} #{@employee.last_name}" %>
+
+<%= turbo_frame_tag "employee_modal" %>
+
+<div class="max-w-2xl">
+  <div class="flex flex-wrap gap-3 mb-6">
+    <%= link_to "← Employees", root_path, class: "text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
+    <%= link_to "Insights", salary_insights_path, data: { turbo: false }, class: "text-sm font-medium text-slate-600 hover:text-indigo-600" %>
+  </div>
+
+  <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+    <h1 class="text-2xl font-bold text-slate-900"><%= @employee.first_name %> <%= @employee.last_name %></h1>
+    <%= render @employee %>
+    <div class="flex flex-wrap gap-2 pt-4">
+      <%= link_to "Edit", edit_employee_path(@employee, q: params[:q]), class: "rounded-lg px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium", data: { turbo_frame: "employee_modal" } %>
+      <%= button_to "Delete", employee_path(@employee, q: params[:q]), method: :delete, class: "rounded-lg px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-sm font-medium cursor-pointer border-0", data: { turbo_confirm: "Delete this employee?" } %>
+    </div>
+  </div>
+</div>

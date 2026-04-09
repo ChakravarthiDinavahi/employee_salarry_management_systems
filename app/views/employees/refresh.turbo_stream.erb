@@ -1,0 +1,11 @@
+<%= turbo_stream.replace "employee_modal" do %>
+  <%= turbo_frame_tag "employee_modal" %>
+<% end %>
+
+<%= turbo_stream.replace "employees_table_frame" do %>
+  <%= render "employees/table_frame", employees: @employees, pagy: @pagy, q: @q %>
+<% end %>
+
+<%= turbo_stream.replace "flash" do %>
+  <%= render "layouts/flash" %>
+<% end %>

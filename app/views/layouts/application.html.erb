@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Employee Salarry Management Systems" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartkick@5.0.1/dist/chartkick.min.js" defer></script>
+
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="bg-slate-50 min-h-screen text-slate-900 antialiased">
+    <header class="border-b border-slate-200 bg-white/90 backdrop-blur sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-5 py-4 flex flex-wrap items-center justify-between gap-3">
+        <%= link_to root_path, class: "text-lg font-bold text-slate-900 tracking-tight" do %>
+          HR <span class="text-indigo-600">Dashboard</span>
+        <% end %>
+        <nav class="flex flex-wrap items-center gap-4 text-sm font-medium">
+          <%= link_to "Employees", root_path, class: class_names("text-slate-700 hover:text-indigo-600", "text-indigo-600 font-semibold" => controller_name == "employees" && action_name == "index") %>
+          <%= link_to "Insights", salary_insights_path, data: { turbo: false }, class: class_names("text-slate-700 hover:text-indigo-600", "text-indigo-600 font-semibold" => controller_name == "salary_insights") %>
+        </nav>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-5 py-10">
+      <div id="flash" class="mb-6">
+        <%= render "layouts/flash" %>
+      </div>
+      <%= yield %>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,46 @@
+<%= turbo_frame_tag "employees_table_frame" do %>
+  <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    <%= form_with url: employees_path, method: :get, data: { turbo_frame: "employees_table_frame", controller: "employee-search", turbo_action: "advance" }, class: "p-4 border-b border-slate-100 bg-slate-50/80" do |f| %>
+      <div class="flex flex-col sm:flex-row gap-3 sm:items-end">
+        <div class="flex-1">
+          <%= label_tag :q, "Search employees", class: "block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1" %>
+          <%= text_field_tag :q, q, placeholder: "Name, email, title, country…", autocomplete: "off",
+                class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50",
+                data: { employee_search_target: "input", action: "input->employee-search#schedule" } %>
+        </div>
+        <%= f.submit "Search", class: "rounded-lg px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium cursor-pointer" %>
+      </div>
+    <% end %>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-slate-200">
+        <thead class="bg-slate-50">
+          <tr>
+            <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">First name</th>
+            <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Last name</th>
+            <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Job title</th>
+            <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Salary</th>
+            <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Country</th>
+            <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Email</th>
+            <th scope="col" class="px-3 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 bg-white">
+          <% if employees.any? %>
+            <%= render partial: "employees/employee_row", collection: employees, as: :employee, locals: { q: q } %>
+          <% else %>
+            <tr>
+              <td colspan="7" class="px-3 py-10 text-center text-slate-500 text-sm">No employees match your search.</td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <% if pagy.last > 1 %>
+      <nav class="pagy-nav flex flex-wrap items-center justify-center gap-2 px-4 py-4 border-t border-slate-100 bg-slate-50/50 text-sm" aria-label="Pagination">
+        <%== pagy.series_nav %>
+      </nav>
+    <% end %>
+  </div>
+<% end %>

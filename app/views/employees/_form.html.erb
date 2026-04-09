@@ -1,0 +1,53 @@
+<%= form_with(model: employee, class: "space-y-4") do |form| %>
+  <% if employee.errors.any? %>
+    <div id="error_explanation" class="bg-red-50 text-red-600 px-3 py-2 font-medium rounded-lg border border-red-200">
+      <h3 class="font-semibold"><%= pluralize(employee.errors.count, "error") %> prohibited this employee from being saved:</h3>
+      <ul class="list-disc ml-6 mt-2 text-sm">
+        <% employee.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <% if local_assigns[:q].present? %>
+    <%= hidden_field_tag :q, q %>
+  <% end %>
+
+  <div>
+    <%= form.label :first_name, class: "block text-sm font-medium text-slate-700" %>
+    <%= form.text_field :first_name, class: field_classes(employee, :first_name) %>
+  </div>
+
+  <div>
+    <%= form.label :last_name, class: "block text-sm font-medium text-slate-700" %>
+    <%= form.text_field :last_name, class: field_classes(employee, :last_name) %>
+  </div>
+
+  <div>
+    <%= form.label :job_title, class: "block text-sm font-medium text-slate-700" %>
+    <%= form.text_field :job_title, class: field_classes(employee, :job_title) %>
+  </div>
+
+  <div>
+    <%= form.label :salary, class: "block text-sm font-medium text-slate-700" %>
+    <%= form.text_field :salary, class: field_classes(employee, :salary) %>
+  </div>
+
+  <div>
+    <%= form.label :country, class: "block text-sm font-medium text-slate-700" %>
+    <%= form.text_field :country, class: field_classes(employee, :country) %>
+  </div>
+
+  <div>
+    <%= form.label :email, class: "block text-sm font-medium text-slate-700" %>
+    <%= form.text_field :email, class: field_classes(employee, :email) %>
+  </div>
+
+  <div class="flex flex-wrap gap-2 pt-2">
+    <%= form.submit class: "rounded-lg px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium cursor-pointer" %>
+    <button type="button" class="rounded-lg px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-sm font-medium" data-action="modal#close">
+      Cancel
+    </button>
+  </div>
+<% end %>
